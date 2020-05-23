@@ -14,6 +14,7 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.converter.KafkaMessageHeaders;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeTypeUtils;
 
@@ -24,52 +25,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 class ConsumerApplicationTests {
 
-    static ObjectMapper objectMapper;
-    @Autowired
-    private InputDestination input;
-    @Autowired
-    private OutputDestination output;
+  static ObjectMapper objectMapper;
+  @Autowired
+  private InputDestination input;
+  @Autowired
+  private OutputDestination output;
 
-    @BeforeAll
-    static void setup() {
-        objectMapper = new ObjectMapper();
-    }
+  @BeforeAll
+  static void setup() {
+    objectMapper = new ObjectMapper();
+  }
 
-    @Test
-    @SneakyThrows
-    void contextLoads() {
-        var sendEvent =
-                PageViewEvent.builder().userid("test").page("page").duration(1).build();
-        var sendMessage =
-                MessageBuilder.withPayload(sendEvent)
-                        .setHeader(KafkaMessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
-                        .setHeader(KafkaHeaders.MESSAGE_KEY, "test")
-                        .build();
+  private static void testHeaders(Message<byte[]> message) {
+    assertThat(message.getHeaders())
+            .containsEntry(KafkaHeaders.MESSAGE_KEY, "test")
+            .containsEntry(KafkaMessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
+  }
 
-        input.send(sendMessage);
-        log.info("Sent: {}", sendMessage);
+  @Test
+  @SneakyThrows
+  void contextLoads() {
+    var sendEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
+    var sendMessage =
+            MessageBuilder.withPayload(sendEvent)
+                    .setHeader(KafkaMessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
+                    .setHeader(KafkaHeaders.MESSAGE_KEY, "test")
+                    .build();
 
-        var receivedMessage = output.receive();
-        log.info("Received: {}", receivedMessage);
+    input.send(sendMessage);
 
-        var receivedEvent =
-                objectMapper.readValue(
-                        receivedMessage.getPayload(), PageViewEvent.class);
-        log.info("Received Object: {}", receivedEvent);
-        assertThat(receivedEvent)
-                .is(new Condition<>(e -> e.getUserid().equals("TEST"), "uppercase name"))
-                .isEqualTo(sendEvent.withUserid("TEST"));
-    }
+    var receivedMessage = output.receive();
+    var receivedEvent = objectMapper.readValue(receivedMessage.getPayload(), PageViewEvent.class);
 
-    @Test
-    void upperCaseNameTest() {
-        var upperCaseFn = new ConsumerApplication().upperCaseName();
-        log.info("upperCaseFn: {}", upperCaseFn);
-        var inEvent =
-                PageViewEvent.builder().userid("test").page("page").duration(1).build();
+    assertThat(receivedMessage).satisfies(ConsumerApplicationTests::testHeaders);
+    assertThat(receivedEvent)
+            .is(new Condition<>(e -> e.getUserid().equals("TEST"), "uppercase name"))
+            .isEqualTo(sendEvent.withUserid("TEST"));
+  }
 
-        assertThat(upperCaseFn.apply(inEvent))
-                .extracting(PageViewEvent::getUserid)
-                .isEqualTo("TEST");
-    }
+  @Test
+  void upperCaseNameTest() {
+    var upperCaseFn = new ConsumerApplication().upperCaseName();
+    var inEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
+
+    assertThat(upperCaseFn.apply(inEvent)).extracting(PageViewEvent::getUserid).isEqualTo("TEST");
+  }
 }
