@@ -12,22 +12,26 @@ import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.converter.KafkaMessageHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.kafka.support.KafkaHeaders.MESSAGE_KEY;
+import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 @SpringBootTest
 @Import({TestChannelBinderConfiguration.class})
 @Log4j2
-class ConsumerApplicationTests {
+class CloudFunctionApplicationTests {
 
-  static ObjectMapper objectMapper;
+  private static ObjectMapper objectMapper;
+
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private InputDestination input;
+
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private OutputDestination output;
 
@@ -38,8 +42,8 @@ class ConsumerApplicationTests {
 
   private static void testHeaders(Message<byte[]> message) {
     assertThat(message.getHeaders())
-            .containsEntry(KafkaHeaders.MESSAGE_KEY, "test")
-            .containsEntry(KafkaMessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
+            .containsEntry(MESSAGE_KEY, "test")
+            .containsEntry(CONTENT_TYPE, APPLICATION_JSON);
   }
 
   @Test
@@ -48,8 +52,8 @@ class ConsumerApplicationTests {
     var sendEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
     var sendMessage =
             MessageBuilder.withPayload(sendEvent)
-                    .setHeader(KafkaMessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
-                    .setHeader(KafkaHeaders.MESSAGE_KEY, "test")
+                    .setHeader(CONTENT_TYPE, APPLICATION_JSON)
+                    .setHeader(MESSAGE_KEY, "test")
                     .build();
 
     input.send(sendMessage);
@@ -57,7 +61,7 @@ class ConsumerApplicationTests {
     var receivedMessage = output.receive();
     var receivedEvent = objectMapper.readValue(receivedMessage.getPayload(), PageViewEvent.class);
 
-    assertThat(receivedMessage).satisfies(ConsumerApplicationTests::testHeaders);
+    assertThat(receivedMessage).satisfies(CloudFunctionApplicationTests::testHeaders);
     assertThat(receivedEvent)
             .is(new Condition<>(e -> e.getUserid().equals("TEST"), "uppercase name"))
             .isEqualTo(sendEvent.withUserid("TEST"));
@@ -65,7 +69,7 @@ class ConsumerApplicationTests {
 
   @Test
   void upperCaseNameTest() {
-    var upperCaseFn = new ConsumerApplication().upperCaseName();
+    var upperCaseFn = new CloudFunctionApplication().toUpperCaseUserid();
     var inEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
 
     assertThat(upperCaseFn.apply(inEvent)).extracting(PageViewEvent::getUserid).isEqualTo("TEST");
