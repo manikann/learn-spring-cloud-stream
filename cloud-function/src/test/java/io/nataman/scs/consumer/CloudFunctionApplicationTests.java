@@ -1,5 +1,10 @@
 package io.nataman.scs.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.kafka.support.KafkaHeaders.MESSAGE_KEY;
+import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -14,11 +19,6 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.kafka.support.KafkaHeaders.MESSAGE_KEY;
-import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
-import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON;
 
 @SpringBootTest
 @Import({TestChannelBinderConfiguration.class})
@@ -42,8 +42,8 @@ class CloudFunctionApplicationTests {
 
   private static void testHeaders(Message<byte[]> message) {
     assertThat(message.getHeaders())
-            .containsEntry(MESSAGE_KEY, "test")
-            .containsEntry(CONTENT_TYPE, APPLICATION_JSON);
+        .containsEntry(MESSAGE_KEY, "test")
+        .containsEntry(CONTENT_TYPE, APPLICATION_JSON);
   }
 
   @Test
@@ -51,10 +51,10 @@ class CloudFunctionApplicationTests {
   void contextLoads() {
     var sendEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
     var sendMessage =
-            MessageBuilder.withPayload(sendEvent)
-                    .setHeader(CONTENT_TYPE, APPLICATION_JSON)
-                    .setHeader(MESSAGE_KEY, "test")
-                    .build();
+        MessageBuilder.withPayload(sendEvent)
+            .setHeader(CONTENT_TYPE, APPLICATION_JSON)
+            .setHeader(MESSAGE_KEY, "test")
+            .build();
 
     input.send(sendMessage);
 
@@ -63,8 +63,8 @@ class CloudFunctionApplicationTests {
 
     assertThat(receivedMessage).satisfies(CloudFunctionApplicationTests::testHeaders);
     assertThat(receivedEvent)
-            .is(new Condition<>(e -> e.getUserid().equals("TEST"), "uppercase name"))
-            .isEqualTo(sendEvent.withUserid("TEST"));
+        .is(new Condition<>(e -> e.getUserid().equals("TEST"), "uppercase name"))
+        .isEqualTo(sendEvent.withUserid("TEST"));
   }
 
   @Test
