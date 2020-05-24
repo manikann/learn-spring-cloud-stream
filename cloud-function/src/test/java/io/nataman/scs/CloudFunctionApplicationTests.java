@@ -1,4 +1,4 @@
-package io.nataman.scs.consumer;
+package io.nataman.scs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.kafka.support.KafkaHeaders.MESSAGE_KEY;

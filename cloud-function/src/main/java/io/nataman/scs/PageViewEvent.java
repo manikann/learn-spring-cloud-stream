@@ -1,4 +1,4 @@
-package io.nataman.scs.consumer;
+package io.nataman.scs;
 
 import lombok.Builder;
 import lombok.NonNull;

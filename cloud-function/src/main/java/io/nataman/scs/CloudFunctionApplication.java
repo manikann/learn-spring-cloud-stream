@@ -1,4 +1,4 @@
-package io.nataman.scs.consumer;
+package io.nataman.scs;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
