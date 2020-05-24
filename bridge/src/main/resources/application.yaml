@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: k3m:31759
+      bindings:
+        bridge-out-0:
+          destination: bridge
+          group: bridge
+        bridge-in-0:
+          destination: bridge
+          group: bridge
+#      function:
+#        definition: eventSink;eventSupplier
