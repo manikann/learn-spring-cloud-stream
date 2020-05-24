@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Log4j2
 @Controller
 @RequiredArgsConstructor
-public class BridgeApplication {
+public class StreamBridgeApplication {
 
   private final StreamBridge streamBridge;
 
   public static void main(String[] args) {
-    SpringApplication.run(BridgeApplication.class, args);
+    SpringApplication.run(StreamBridgeApplication.class, args);
   }
 
   @PostMapping(consumes = {MimeTypeUtils.APPLICATION_JSON_VALUE})

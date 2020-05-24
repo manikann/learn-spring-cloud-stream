@@ -2,5 +2,6 @@ rootProject.name = 'scs'
 include 'reactive-supplier'
 include 'cloud-function'
 include 'supplier-consumer'
-include 'bridge'
+include 'stream-bridge'
+include 'emitter-bridge'
 
