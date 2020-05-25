@@ -10,11 +10,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 
-@SpringBootTest(args = "--spring.cloud.stream.function.definition=eventSupplier")
+@SpringBootTest(
+    args = "--spring.cloud.stream.function.definition=eventSupplier",
+    webEnvironment = WebEnvironment.NONE)
 @Import({TestChannelBinderConfiguration.class})
 @Log4j2
 class SupplierApplicationTests {

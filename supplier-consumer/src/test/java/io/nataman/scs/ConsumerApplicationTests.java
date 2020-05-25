@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -21,7 +22,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(args = "--spring.cloud.stream.function.definition=eventSink")
+@SpringBootTest(
+    args = "--spring.cloud.stream.function.definition=eventSink",
+    webEnvironment = WebEnvironment.NONE)
 @Import({TestChannelBinderConfiguration.class})
 @Log4j2
 @DirtiesContext
