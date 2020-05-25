@@ -17,6 +17,6 @@ public class PageViewEvent {
   @NotBlank(message = "page is mandatory")
   String page;
 
-  @Min(value = 0, message = "duration cannot be negative")
+  @Min(value = 1, message = "duration cannot be negative")
   int duration;
 }

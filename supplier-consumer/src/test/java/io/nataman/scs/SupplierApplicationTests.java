@@ -41,7 +41,8 @@ class SupplierApplicationTests {
     log.info("receivedMessage: {}", receivedMessage);
     var receivedEvent = objectMapper.readValue(receivedMessage.getPayload(), PageViewEvent.class);
     assertThat(receivedEvent)
-        .is(new Condition<>(SupplierApplicationTests::validatePageViewEvent,
-            "check userid=source"));
+        .is(
+            new Condition<>(
+                SupplierApplicationTests::validatePageViewEvent, "check userid=source"));
   }
 }

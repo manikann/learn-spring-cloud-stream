@@ -32,7 +32,11 @@ public class ReactiveSupplierConsumerApplication {
 
   static Message<PageViewEvent> newMessage(long l) {
     var payload =
-        PageViewEvent.builder().userid("source").page("page").duration(Math.toIntExact(l)).build();
+        PageViewEvent.builder()
+            .userid("source")
+            .page("page")
+            .duration(Math.toIntExact(l) % 10)
+            .build();
     return MessageBuilder.withPayload(payload)
         .setHeader(MESSAGE_KEY, "message-key")
         .setHeader(CONTENT_TYPE, APPLICATION_JSON)
@@ -55,7 +59,16 @@ public class ReactiveSupplierConsumerApplication {
   @Bean
   public Consumer<Flux<Message<PageViewEvent>>> eventSink(
       Consumer<Message<PageViewEvent>> consumer) {
-    return flux -> flux.log("eventSink").filter(this::validateMessage).subscribe(consumer);
+    return flux ->
+        flux.log("eventSink")
+            .filter(this::validateMessage)
+            .onErrorContinue(
+                (t, msg) ->
+                    log.fatal(
+                        "DLQ logic to be implemented here (waiting for https://github.com/spring-cloud/spring-cloud-stream/issues/1922) {}",
+                        msg,
+                        t))
+            .subscribe(consumer);
   }
 
   private boolean validateMessage(Message<PageViewEvent> m) {
