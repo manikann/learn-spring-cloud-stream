@@ -31,7 +31,7 @@ class SupplierApplicationTests {
   }
 
   private static boolean validatePageViewEvent(PageViewEvent e) {
-    return e.getUserid().equals("source");
+    return e.getUserid().equals("user1");
   }
 
   @Test
