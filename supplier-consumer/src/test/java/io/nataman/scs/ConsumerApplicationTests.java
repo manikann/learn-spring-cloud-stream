@@ -1,5 +1,7 @@
 package io.nataman.scs;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.kafka.support.KafkaHeaders.MESSAGE_KEY;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -28,11 +31,11 @@ class ConsumerApplicationTests {
   @Autowired
   private InputDestination input;
 
-  @MockBean
-  private Consumer<PageViewEvent> eventSink;
+  @MockBean(name = "processMessage")
+  private Consumer<Message<PageViewEvent>> processMessage;
 
   @Test
-  void contextLoads() {
+  void testSuccess() {
     var sendEvent = PageViewEvent.builder().userid("test").page("page").duration(1).build();
     var sendMessage =
         MessageBuilder.withPayload(sendEvent)
@@ -40,6 +43,18 @@ class ConsumerApplicationTests {
             .setHeader(MESSAGE_KEY, "test")
             .build();
     input.send(sendMessage);
-    verify(eventSink, times(1)).accept(sendEvent);
+    verify(processMessage, times(1)).accept(any());
+  }
+
+  @Test
+  void testValidationFailure() {
+    var sendEvent = PageViewEvent.builder().userid("test").page("page").duration(0).build();
+    var sendMessage =
+        MessageBuilder.withPayload(sendEvent)
+            .setHeader(CONTENT_TYPE, APPLICATION_JSON)
+            .setHeader(MESSAGE_KEY, "test")
+            .build();
+    input.send(sendMessage);
+    verify(processMessage, never()).accept(any());
   }
 }
