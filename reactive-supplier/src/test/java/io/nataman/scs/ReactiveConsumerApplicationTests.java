@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -29,7 +30,7 @@ class ReactiveConsumerApplicationTests {
   private InputDestination input;
 
   @MockBean
-  private Consumer<PageViewEvent> sinkConsumer;
+  private Consumer<Message<PageViewEvent>> sinkConsumer;
 
   @Test
   void contextLoads() {
@@ -40,6 +41,6 @@ class ReactiveConsumerApplicationTests {
             .setHeader(MESSAGE_KEY, "test")
             .build();
     input.send(sendMessage);
-    verify(sinkConsumer, times(1)).accept(sendEvent);
+    verify(sinkConsumer, times(1)).accept(sendMessage);
   }
 }

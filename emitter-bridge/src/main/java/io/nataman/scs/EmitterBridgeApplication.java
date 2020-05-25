@@ -1,6 +1,7 @@
 package io.nataman.scs;
 
 import java.util.function.Supplier;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +30,7 @@ public class EmitterBridgeApplication {
 
   @PostMapping(consumes = {MimeTypeUtils.APPLICATION_JSON_VALUE})
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public void bridge(@RequestBody PageViewEvent pageViewEvent) {
+  public void bridge(@RequestBody @Valid PageViewEvent pageViewEvent) {
     log.info("Received request: {}", pageViewEvent);
     emitterProcessor.onNext(pageViewEvent);
   }
